@@ -1,8 +1,8 @@
 package org.kkumulkkum.server.domain.participant.manager;
 
 import lombok.RequiredArgsConstructor;
+import org.kkumulkkum.server.api.participant.dto.projection.ParticipantStatusUserInfoProjection;
 import org.kkumulkkum.server.domain.participant.Participant;
-import org.kkumulkkum.server.api.participant.dto.ParticipantStatusUserInfoDto;
 import org.kkumulkkum.server.api.participant.dto.response.LateComerDto;
 import org.kkumulkkum.server.common.exception.ParticipantException;
 import org.kkumulkkum.server.common.exception.code.ParticipantErrorCode;
@@ -29,7 +29,7 @@ public class ParticipantRetriever {
         return participantRepository.findAllByPromiseId(promiseId);
     }
 
-    public List<ParticipantStatusUserInfoDto> findAllByPromiseIdWithUserInfo(final Long promiseId) {
+    public List<ParticipantStatusUserInfoProjection> findAllByPromiseIdWithUserInfo(final Long promiseId) {
         return participantRepository.findAllByPromiseIdWithUserInfo(promiseId);
     }
 
