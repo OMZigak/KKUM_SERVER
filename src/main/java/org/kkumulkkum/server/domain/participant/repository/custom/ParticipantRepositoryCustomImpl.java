@@ -2,17 +2,20 @@ package org.kkumulkkum.server.domain.participant.repository.custom;
 
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.kkumulkkum.server.api.participant.dto.projection.ParticipantStatusUserInfoProjection;
+import org.kkumulkkum.server.api.participant.dto.response.LateComerDto;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
 import static org.kkumulkkum.server.domain.participant.QParticipant.participant;
 import static org.kkumulkkum.server.domain.member.QMember.member;
+import static org.kkumulkkum.server.domain.promise.QPromise.promise;
 import static org.kkumulkkum.server.domain.userinfo.QUserInfo.userInfo;
 
 
@@ -46,6 +49,23 @@ public class ParticipantRepositoryCustomImpl implements ParticipantRepositoryCus
                 .fetch();
     }
 
+    @Override
+    public List<LateComerDto> findAllLateComersByPromiseId(Long promiseId) {
+        return queryFactory
+                .select(Projections.constructor(
+                        LateComerDto.class,
+                        participant.id,
+                        userInfo.name,
+                        userInfo.profileImg
+                ))
+                .from(participant)
+                .join(participant.member, member)
+                .join(userInfo).on(member.user.id.eq(userInfo.user.id))
+                .join(participant.promise, promise)
+                .where(participant.promise.id.eq(promiseId), isLate())
+                .fetch();
+    }
+
     private static final Expression<String> stateExpression = new CaseBuilder()
             .when(participant.arrivalAt.isNotNull()).then("도착")
             .when(participant.departureAt.isNotNull()).then("이동중")
@@ -57,4 +77,9 @@ public class ParticipantRepositoryCustomImpl implements ParticipantRepositoryCus
             .when(participant.departureAt.isNotNull()).then(2)
             .when(participant.preparationStartAt.isNotNull()).then(3)
             .otherwise(4);
+
+    private BooleanExpression isLate() {
+        return participant.arrivalAt.isNull()
+                .or(participant.arrivalAt.after(promise.time));
+    }
 }
