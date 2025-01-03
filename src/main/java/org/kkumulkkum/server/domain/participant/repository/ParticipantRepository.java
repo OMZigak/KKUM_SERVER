@@ -1,30 +1,21 @@
 package org.kkumulkkum.server.domain.participant.repository;
 
 import org.kkumulkkum.server.domain.participant.Participant;
-import org.kkumulkkum.server.api.participant.dto.ParticipantStatusUserInfoDto;
 import org.kkumulkkum.server.api.participant.dto.response.LateComerDto;
+import org.kkumulkkum.server.domain.participant.repository.custom.ParticipantRepositoryCustom;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 import java.util.Optional;
 
-public interface ParticipantRepository extends JpaRepository<Participant, Long> {
+public interface ParticipantRepository extends JpaRepository<Participant, Long>, ParticipantRepositoryCustom {
 
     @Query("""
             SELECT p FROM Participant p
             JOIN FETCH Member m ON p.member.id = m.id
             WHERE p.promise.id = :promiseId AND m.user.id = :userId""")
     Optional<Participant> findByPromiseIdAndUserId(Long promiseId, Long userId);
-
-    @Query("""
-            SELECT new org.kkumulkkum.server.api.participant.dto.ParticipantStatusUserInfoDto
-            (p.id, p.member.id, ui.name, ui.profileImg, p.preparationStartAt, p.departureAt, p.arrivalAt)
-            FROM Participant p
-            JOIN Member m ON p.member.id = m.id
-            JOIN UserInfo ui ON m.user.id = ui.user.id
-            WHERE p.promise.id = :promiseId""")
-    List<ParticipantStatusUserInfoDto> findAllByPromiseIdWithUserInfo(Long promiseId);
 
     @Query("""
             SELECT new org.kkumulkkum.server.api.participant.dto.response.LateComerDto
