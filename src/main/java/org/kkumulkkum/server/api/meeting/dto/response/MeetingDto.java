@@ -13,13 +13,13 @@ public record MeetingDto (
         Long metCount,
         String invitationCode
 ) {
-    public static MeetingDto of(Meeting meeting, Long metCount) {
+    public static MeetingDto of(Long id, String name, LocalDateTime createdAt, String invitationCode, Long metCount) {
         return new MeetingDto(
-                meeting.getId(),
-                meeting.getName(),
-                meeting.getCreatedAt(),
+                id,
+                name,
+                createdAt,
                 metCount,
-                meeting.getInvitationCode()
+                invitationCode
         );
     }
 }

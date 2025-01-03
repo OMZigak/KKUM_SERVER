@@ -2,6 +2,7 @@ package org.kkumulkkum.server.api.participant.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.kkumulkkum.server.api.meeting.dto.projection.MemberProjection;
 import org.kkumulkkum.server.api.participant.dto.projection.ParticipantStatusUserInfoProjection;
 import org.kkumulkkum.server.domain.participant.manager.ParticipantEditor;
 import org.kkumulkkum.server.domain.participant.manager.ParticipantRemover;
@@ -10,7 +11,6 @@ import org.kkumulkkum.server.api.participant.dto.response.*;
 import org.kkumulkkum.server.domain.member.Member;
 import org.kkumulkkum.server.domain.participant.Participant;
 import org.kkumulkkum.server.domain.promise.Promise;
-import org.kkumulkkum.server.api.meeting.dto.response.MemberDto;
 import org.kkumulkkum.server.api.participant.dto.request.PreparationInfoDto;
 import org.kkumulkkum.server.common.exception.ParticipantException;
 import org.kkumulkkum.server.common.exception.code.ParticipantErrorCode;
@@ -127,10 +127,10 @@ public class ParticipantService {
             final Long promiseId
     ) {
         //모임 내 멤버 목록
-        List<MemberDto> members = memberRetreiver.findAllByPromiseId(promiseId);
+        List<MemberProjection> members = memberRetreiver.findAllByPromiseId(promiseId);
         //나 제외
         Member authenticatedMember = memberRetreiver.findByUserIdAndPromiseId(userId, promiseId);
-        members.removeIf(member -> member.memberId().equals(authenticatedMember.getId()));
+        members.removeIf(member -> member.getMemberId().equals(authenticatedMember.getId()));
 
         //약속에 참여 중인 멤버 id들 가져오기
         List<Long> participantIds = participantRetriever.findAllByPromiseId(promiseId).stream()

@@ -1,7 +1,7 @@
 package org.kkumulkkum.server.domain.member.repository;
 
+import org.kkumulkkum.server.api.meeting.dto.projection.MemberProjection;
 import org.kkumulkkum.server.domain.member.Member;
-import org.kkumulkkum.server.api.meeting.dto.response.MemberDto;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -15,12 +15,12 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     boolean existsByMeetingIdAndUserId(Long meetingId, Long userId);
 
     @Query("""
-            SELECT new org.kkumulkkum.server.api.meeting.dto.response.MemberDto
-            (m.id, ui.name, ui.profileImg)
+            SELECT
+                m.id as memberId, ui.name as name, ui.profileImg as profileImg
             FROM Member m
             JOIN FETCH UserInfo ui ON m.user.id = ui.user.id
             WHERE m.meeting.id = :meetingId""")
-    List<MemberDto> findAllByMeetingId(Long meetingId);
+    List<MemberProjection> findAllByMeetingId(Long meetingId);
 
     @Query("""
             SELECT CASE WHEN EXISTS (
@@ -51,12 +51,12 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     Member findByUserIdAndPromiseId(Long userId, Long promiseId);
 
     @Query("""
-            SELECT new org.kkumulkkum.server.api.meeting.dto.response.MemberDto
-            (m.id, ui.name, ui.profileImg)
+            SELECT
+                m.id as memberId, ui.name as name, ui.profileImg as profileImg
             FROM Member m
             JOIN m.meeting mt
             JOIN FETCH UserInfo ui ON m.user.id = ui.user.id
             JOIN Promise p ON p.meeting.id = mt.id
             WHERE p.id = :promiseId""")
-    List<MemberDto> findAllByPromiseId(Long promiseId);
+    List<MemberProjection> findAllByPromiseId(Long promiseId);
 }
