@@ -162,13 +162,7 @@ public class ParticipantService {
         List<LateComerDto> lateComers = participantRetriever.findAllLateComersByPromiseId(promiseId);
         return LateComersDto.of(
                 promise,
-                lateComers.stream()
-                        .map(lateComer -> LateComerDto.of(
-                                lateComer.participantId(),
-                                lateComer.name(),
-                                lateComer.profileImg())
-                        )
-                        .collect(Collectors.toList())
+                lateComers
         );
     }
 
