@@ -1,8 +1,8 @@
 package org.kkumulkkum.server.domain.member.manager;
 
 import lombok.RequiredArgsConstructor;
+import org.kkumulkkum.server.api.meeting.dto.projection.MemberProjection;
 import org.kkumulkkum.server.domain.member.Member;
-import org.kkumulkkum.server.api.meeting.dto.response.MemberDto;
 import org.kkumulkkum.server.common.exception.MemberException;
 import org.kkumulkkum.server.common.exception.code.MemberErrorCode;
 import org.kkumulkkum.server.domain.member.repository.MemberRepository;
@@ -28,7 +28,7 @@ public class MemberRetreiver {
         return memberRepository.existsByMeetingIdAndUserId(meetingId, userId);
     }
 
-    public List<MemberDto> findAllByMeetingId(final Long meetingId) {
+    public List<MemberProjection> findAllByMeetingId(final Long meetingId) {
         return memberRepository.findAllByMeetingId(meetingId);
     }
 
@@ -54,7 +54,7 @@ public class MemberRetreiver {
         return memberRepository.findByUserIdAndPromiseId(userId, promiseId);
     }
 
-    public List<MemberDto> findAllByPromiseId(final Long promiseId) {
+    public List<MemberProjection> findAllByPromiseId(final Long promiseId) {
         return memberRepository.findAllByPromiseId(promiseId);
     }
 }

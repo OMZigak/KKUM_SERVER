@@ -2,6 +2,8 @@ package org.kkumulkkum.server.api.participant.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.kkumulkkum.server.api.meeting.dto.projection.MemberProjection;
+import org.kkumulkkum.server.api.participant.dto.projection.ParticipantStatusUserInfoProjection;
 import org.kkumulkkum.server.domain.participant.manager.ParticipantEditor;
 import org.kkumulkkum.server.domain.participant.manager.ParticipantRemover;
 import org.kkumulkkum.server.domain.participant.manager.ParticipantRetriever;
@@ -9,8 +11,6 @@ import org.kkumulkkum.server.api.participant.dto.response.*;
 import org.kkumulkkum.server.domain.member.Member;
 import org.kkumulkkum.server.domain.participant.Participant;
 import org.kkumulkkum.server.domain.promise.Promise;
-import org.kkumulkkum.server.api.meeting.dto.response.MemberDto;
-import org.kkumulkkum.server.api.participant.dto.ParticipantStatusUserInfoDto;
 import org.kkumulkkum.server.api.participant.dto.request.PreparationInfoDto;
 import org.kkumulkkum.server.common.exception.ParticipantException;
 import org.kkumulkkum.server.common.exception.code.ParticipantErrorCode;
@@ -25,7 +25,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -107,10 +106,16 @@ public class ParticipantService {
 
     @Transactional(readOnly = true)
     public ParticipantsDto getParticipants(final Long promiseId) {
-        List<ParticipantStatusUserInfoDto> participants = participantRetriever.findAllByPromiseIdWithUserInfo(promiseId);
+        List<ParticipantStatusUserInfoProjection> participants = participantRetriever.findAllByPromiseIdWithUserInfo(promiseId);
+
         List<ParticipantDto> sortedParticipants = participants.stream()
-                .map(this::createParticipantDto)
-                .sorted(Comparator.comparing(ParticipantDto::state, Comparator.comparingInt(this::stateOrder)))
+                .map(participant -> ParticipantDto.of(
+                        participant.participantId(),
+                        participant.memberId(),
+                        participant.name(),
+                        participant.profileImg(),
+                        participant.state()
+                ))
                 .collect(Collectors.toList());
 
         return ParticipantsDto.from(sortedParticipants);
@@ -122,10 +127,10 @@ public class ParticipantService {
             final Long promiseId
     ) {
         //모임 내 멤버 목록
-        List<MemberDto> members = memberRetreiver.findAllByPromiseId(promiseId);
+        List<MemberProjection> members = memberRetreiver.findAllByPromiseId(promiseId);
         //나 제외
         Member authenticatedMember = memberRetreiver.findByUserIdAndPromiseId(userId, promiseId);
-        members.removeIf(member -> member.memberId().equals(authenticatedMember.getId()));
+        members.removeIf(member -> member.getMemberId().equals(authenticatedMember.getId()));
 
         //약속에 참여 중인 멤버 id들 가져오기
         List<Long> participantIds = participantRetriever.findAllByPromiseId(promiseId).stream()
@@ -157,13 +162,7 @@ public class ParticipantService {
         List<LateComerDto> lateComers = participantRetriever.findAllLateComersByPromiseId(promiseId);
         return LateComersDto.of(
                 promise,
-                lateComers.stream()
-                        .map(lateComer -> LateComerDto.of(
-                                lateComer.participantId(),
-                                lateComer.name(),
-                                lateComer.profileImg())
-                        )
-                        .collect(Collectors.toList())
+                lateComers
         );
     }
 
@@ -209,36 +208,5 @@ public class ParticipantService {
 
     private boolean isNotNull(final LocalDateTime time) {
         return time != null;
-    }
-
-    private ParticipantDto createParticipantDto(final ParticipantStatusUserInfoDto dto) {
-        String state = determineState(dto.preparationAt(), dto.departureAt(), dto.arrivalAt());  // 상태 결정 로직 호출
-
-        return ParticipantDto.of(dto.participantId(), dto.memberId(), dto.name(), dto.profileImg(), state);
-    }
-
-    private String determineState(
-            final LocalDateTime preparationAt,
-            final LocalDateTime departureAt,
-            final LocalDateTime arrivalAt
-    ) {
-        if (arrivalAt != null) {
-            return "도착";
-        } else if (departureAt != null) {
-            return "이동중";
-        } else if (preparationAt != null) {
-            return "준비중";
-        }
-        return "꾸물중";
-    }
-
-    private int stateOrder(String state) {
-        switch(state) {
-            case "도착": return 1;
-            case "이동중": return 2;
-            case "준비중": return 3;
-            case "꾸물중": return 4;
-            default: return 5;
-        }
     }
 }

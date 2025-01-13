@@ -1,19 +1,19 @@
 package org.kkumulkkum.server.api.participant.dto.response;
 
-import org.kkumulkkum.server.api.meeting.dto.response.MemberDto;
+import org.kkumulkkum.server.api.meeting.dto.projection.MemberProjection;
 
 import java.util.List;
 public record AvailableParticipantsDto(
         List<AvailableParticipantDto> members
 ) {
-    public static AvailableParticipantsDto of(List<MemberDto> members, List<Long> participantIds) {
+    public static AvailableParticipantsDto of(List<MemberProjection> members, List<Long> participantIds) {
         List<AvailableParticipantDto> participantDtos = members.stream()
                 .map(member -> new AvailableParticipantDto(
-                        member.memberId(),
-                        member.name(),
-                        member.profileImg(),
+                        member.getMemberId(),
+                        member.getName(),
+                        member.getProfileImg(),
                         //모임 내 멤버가 약속 참여중인 멤버 리스트 안에 있으면 true, 아니면 false
-                        participantIds.contains(member.memberId())
+                        participantIds.contains(member.getMemberId())
                 )).toList();
         return new AvailableParticipantsDto(participantDtos);
     }

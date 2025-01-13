@@ -2,6 +2,8 @@ package org.kkumulkkum.server.api.meeting.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.kkumulkkum.server.api.meeting.dto.projection.MeetingMetCountProjection;
+import org.kkumulkkum.server.api.meeting.dto.projection.MemberProjection;
 import org.kkumulkkum.server.domain.meeting.manager.MeetingEditor;
 import org.kkumulkkum.server.domain.meeting.manager.MeetingRemover;
 import org.kkumulkkum.server.domain.meeting.manager.MeetingRetriever;
@@ -11,13 +13,11 @@ import org.kkumulkkum.server.domain.member.manager.MemberRetreiver;
 import org.kkumulkkum.server.domain.member.manager.MemberSaver;
 import org.kkumulkkum.server.domain.meeting.Meeting;
 import org.kkumulkkum.server.domain.member.Member;
-import org.kkumulkkum.server.api.meeting.dto.MeetingMetCountDto;
 import org.kkumulkkum.server.api.meeting.dto.request.MeetingCreateDto;
 import org.kkumulkkum.server.api.meeting.dto.request.MeetingRegisterDto;
 import org.kkumulkkum.server.api.meeting.dto.response.CreatedMeetingDto;
 import org.kkumulkkum.server.api.meeting.dto.response.MeetingDto;
 import org.kkumulkkum.server.api.meeting.dto.response.MeetingsDto;
-import org.kkumulkkum.server.api.meeting.dto.response.MemberDto;
 import org.kkumulkkum.server.api.meeting.dto.response.MembersDto;
 import org.kkumulkkum.server.common.exception.MeetingException;
 import org.kkumulkkum.server.common.exception.code.MeetingErrorCode;
@@ -97,16 +97,22 @@ public class MeetingService {
 
     @Transactional(readOnly = true)
     public MeetingDto getMeeting(final Long meetingId) {
-        MeetingMetCountDto meeting = meetingRetriever.findByIdWithMetCount(meetingId);
-        return MeetingDto.of(meeting.meeting(), meeting.metCount());
+        MeetingMetCountProjection meeting = meetingRetriever.findByIdWithMetCount(meetingId);
+        return MeetingDto.of(
+                meeting.getId(),
+                meeting.getName(),
+                meeting.getCreatedAt(),
+                meeting.getInvitationCode(),
+                meeting.getMetCount()
+        );
     }
 
     @Transactional(readOnly = true)
     public MembersDto getMembers(final Long meetingId, final String exclude, final Long userId) {
-        List<MemberDto> members = memberRetreiver.findAllByMeetingId(meetingId);
+        List<MemberProjection> members = memberRetreiver.findAllByMeetingId(meetingId);
         if (exclude != null) {
             Member authenticatedMember = memberRetreiver.findByMeetingIdAndUserId(meetingId, userId);
-            members.removeIf(member -> member.memberId().equals(authenticatedMember.getId()));
+            members.removeIf(member -> member.getMemberId().equals(authenticatedMember.getId()));
         }
         return MembersDto.from(members);
     }
@@ -130,7 +136,7 @@ public class MeetingService {
         memberRemover.deleteById(member.getId());
 
         // 모임 내 참여 인원이 전부 탈퇴 or 나가기로 없을 경우(모임 사라지면) 약속도 다 삭제하기
-        List<MemberDto> remainingMembers = memberRetreiver.findAllByMeetingId(meetingId);
+        List<MemberProjection> remainingMembers = memberRetreiver.findAllByMeetingId(meetingId);
         if(remainingMembers.isEmpty()) {
             promiseRemover.deleteByMeetingId(meetingId);
             meetingRemover.deleteById(meetingId);
