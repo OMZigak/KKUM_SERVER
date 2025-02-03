@@ -10,10 +10,9 @@ import java.util.List;
 public record PromisesDto(
         List<PromiseDto> promises
 ) {
-    public static PromisesDto of(List<Promise> promises, Boolean done) {
+    public static PromisesDto of(List<Promise> promises) {
         return new PromisesDto(
                 promises.stream()
-                        .filter(promise -> done == null || done.equals(promise.isCompleted()))
                         .map(PromisesDto.PromiseDto::from)
                         .toList()
         );
