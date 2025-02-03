@@ -23,8 +23,8 @@ public class PromiseRepositoryCustomImpl implements PromiseRepositoryCustom {
     public List<Promise> findPromiseByConditions(Long userId, Long meetingId, Boolean done, Boolean isParticipant) {
         return queryFactory
                 .selectFrom(promise)
-                .join(promise.participants, participant).fetchJoin()
-                .join(participant.member, member).fetchJoin()
+                .leftJoin(promise.participants, participant).fetchJoin()
+                .leftJoin(participant.member, member).fetchJoin()
                 .where(
                         meetingIdEq(meetingId),
                         isParticipantEq(userId, meetingId, isParticipant),

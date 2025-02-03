@@ -100,20 +100,6 @@ public class PromiseService {
             final Boolean done,
             final Boolean isParticipant
     ) {
-//        List<Promise> allPromises = promiseRetriever.findAllByMeetingId(meetingId);
-//        List<Promise> userPromises = promiseRetriever.findPromiseByUserIdAndMeetingId(userId, meetingId);
-//        List<Promise> promises;
-//
-//        if (Boolean.TRUE.equals(isParticipant)) {
-//            promises = userPromises;
-//        } else if (Boolean.FALSE.equals(isParticipant)) {
-//            promises = allPromises.stream()
-//                    .filter(promise -> !userPromises.contains(promise))
-//                    .collect(Collectors.toList());
-//        } else {
-//            promises = allPromises;
-//        }
-
         List<Promise> promises = promiseRetriever.findPromisesByConditions(userId, meetingId, done, isParticipant);
 
         return PromisesDto.of(promises);
