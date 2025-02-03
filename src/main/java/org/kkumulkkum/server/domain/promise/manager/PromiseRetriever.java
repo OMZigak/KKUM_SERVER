@@ -70,10 +70,6 @@ public class PromiseRetriever {
         return promiseRepository.existsByArrivedAtIsNull(promiseId);
     }
 
-    public List<Promise> findPromiseByUserIdAndMeetingId(final Long userId, final Long meetingId) {
-        return promiseRepository.findPromiseByUserIdAndMeetingId(userId, meetingId);
-    }
-
     public Promise findByUserIdAndPromiseId(final Long userId, final Long promiseId) {
         return promiseRepository.findByUserIdAndPromiseId(userId, promiseId);
     }
