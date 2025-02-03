@@ -1,6 +1,7 @@
 package org.kkumulkkum.server.domain.promise.repository;
 
 import org.kkumulkkum.server.domain.promise.Promise;
+import org.kkumulkkum.server.domain.promise.repository.custom.PromiseRepositoryCustom;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -9,7 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import java.time.LocalDateTime;
 import java.util.List;
 
-public interface PromiseRepository extends JpaRepository<Promise, Long> {
+public interface PromiseRepository extends JpaRepository<Promise, Long>, PromiseRepositoryCustom {
 
     List<Promise> findAllByMeetingIdOrderByTimeAscCreatedAtAsc(Long meetingId);
 
