@@ -7,8 +7,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.kkumulkkum.server.domain.base.BaseTimeEntity;
 import org.kkumulkkum.server.domain.meeting.Meeting;
+import org.kkumulkkum.server.domain.participant.Participant;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Getter
@@ -43,6 +45,9 @@ public class Promise extends BaseTimeEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "meeting_id")
     private Meeting meeting;
+
+    @OneToMany(mappedBy = "promise")
+    private List<Participant> participants;
 
     @Builder
     public Promise(
